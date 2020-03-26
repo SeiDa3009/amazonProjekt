@@ -1,5 +1,10 @@
 import models.*;
 
+import java.io.*;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -14,12 +19,61 @@ public class ProgramAmazon {
     public static void main(String[] args) {
 
         Shop amazonShop = new Shop();
-        char choiceMainMenu, choiceSearchMenu;
+        char choiceMainMenu, choiceSearchMenu, choiceLoginMenu;
         Customer currentCustomer = new Customer(1, "Otto", "Bla", LocalDate.of(2000, 5, 26), Gender.male);
         amazonShop.registerCustomer(currentCustomer);
         int articleIdForBasket;
         int articleCountForBasket;
         int articleIDToFind = 0;
+        String fileArticle = "Article.bin";
+        List<Article> article = amazonShop.getArticles();
+        boolean correctLogin = false;
+        String usernameConfig = "username.txt";
+        String passwordConfig = "password.txt";
+        int counter = 0;
+        boolean fileExists = false;
+        List<Article> loadedArticle = new ArrayList<>();
+
+
+        if(Files.exists(Paths.get(fileArticle))){
+            loadedArticle = deserializeArticle(fileArticle);
+            fileExists = true;
+        }
+        else{
+            createFile(fileArticle);
+            serializeArticle(fileArticle, article);
+        }
+
+        do {
+            choiceLoginMenu = loginMenu();
+            switch (choiceLoginMenu) {
+                case 'l':
+                    do {
+                        System.out.println("Login:");
+                        String username = enterUsername();
+                        String password = enterPassword();
+                        List<Integer> count = controlUsername(usernameConfig,username);
+                        Boolean correctData = controlPassword(count, passwordConfig,password);
+                        correctLogin = login(correctData);
+                        if (!correctLogin) {
+                            System.out.println("Wrong ... try again" + "\n");
+                            counter += 1;
+                            if (counter >= 3) {
+                                System.out.println("Login failed!");
+                                System.out.println("Exit program");
+                                System.exit(0);
+                            }
+                        }
+                    }while (!correctLogin);
+                    break;
+                case 'r':
+                    System.out.println("Register:");
+                    registerUsername(usernameConfig);
+                    registerPassword(passwordConfig);
+                    correctLogin = false;
+                    break;
+            }
+        }while (!correctLogin);
 
         do{
             choiceMainMenu = mainMenu();
@@ -29,7 +83,15 @@ public class ProgramAmazon {
                         choiceSearchMenu = searchMenu();
                         switch(choiceSearchMenu){
                             case 'a':
-                                System.out.println(amazonShop.toString());
+                                if(fileExists){
+                                    for (int k = 0; k < loadedArticle.size(); k++){
+                                        System.out.println(loadedArticle.get(k));
+                                    }
+                                }
+                                else{
+                                    System.out.println(amazonShop.toString());
+                                }
+
                                 break;
                             case 'c':
                                 printItems(amazonShop.findArticlesByCategories( enterListOfCategories() ));
@@ -74,6 +136,17 @@ public class ProgramAmazon {
                             }
                         }
                     }while(choiceSearchMenu != 'x');
+                    break;
+                case 'u':
+                    int id = IDCalculator(usernameConfig, enterUsername(), passwordConfig, enterPassword());
+                    if (id >= 9999){
+                        System.out.println("Error!");
+                    }
+                    System.out.print("Username: ");
+                    readLine(usernameConfig, id);
+                    System.out.print("Password: ");
+                    readLine(passwordConfig, id);
+                    System.out.println(" ");
                     break;
                 case 'b':
                     System.out.println(currentCustomer.getBasket().toString());
@@ -125,6 +198,7 @@ public class ProgramAmazon {
 
     public static char mainMenu(){
         System.out.println("s ... search for articles ->");
+        System.out.println("u ... user-manager");
         System.out.println("b ... show basket");
         System.out.println("c ... confirm order");
         System.out.println("x ... exit program");
@@ -222,4 +296,157 @@ public class ProgramAmazon {
             }
         }
     }
+    private static void createFile(String filename) {
+        try {
+            Files.createFile(Paths.get(filename));
+        } catch (FileAlreadyExistsException e) {
+            System.out.println("Fehler: Datei existiert bereits!");
+        } catch (IOException e) {
+            System.out.println("Fehler: IO-Fehler");
+        }
+    }
+    public static void serializeArticle(String filename, List<Article> articles){
+        try(FileOutputStream fos = new FileOutputStream(filename);
+            ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            oos.writeObject(articles);
+        }
+        catch (IOException e){
+            System.out.println("Serialisierung hat nicht funktioniert!");
+        }
+    }
+    public static List<Article> deserializeArticle(String filename){
+        try(FileInputStream fis = new FileInputStream(filename);
+            ObjectInputStream ois = new ObjectInputStream(fis)) {
+
+            return (List<Article>)ois.readObject();
+        }
+
+        catch (IOException e){
+            System.out.println("Deserialisierung hat nicht funktioniert!");
+        }
+        catch(ClassNotFoundException e){
+            System.out.println("Klasse Person oder Address existiert nicht!");
+        }
+        return null;
+    }
+    public static boolean login(boolean correctData){
+        if(correctData){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    public static char loginMenu(){
+        System.out.println("l ... login");
+        System.out.println("r ... register");
+        System.out.print("Select one: ");
+        return reader.next().toLowerCase().charAt(0);
+    }
+    private static void appendText(String text, BufferedWriter writer) {
+        try {
+            writer.write(text + "\n");
+            writer.flush();
+        } catch (IOException e) {
+            System.out.println("Fehler: Text konnte nicht in der Datei abgelegt werden!");
+        }
+    }
+    private static BufferedWriter openFile(String filename) {
+        try {
+            return Files.newBufferedWriter(Paths.get(filename), StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            System.out.println("Fehler: Datei konnte nicht geöffnet werden.");
+        }
+        return null;
+    }
+    private static List<String> readLineByLineMod(String filename) {
+        List<String> content = new ArrayList<String>();
+        try {
+            return Files.readAllLines(Paths.get(filename));
+
+        } catch (IOException e) {
+            System.out.println("Fehler!");
+        }
+        return null;
+
+    }
+    public static void registerUsername(String filename){
+        BufferedWriter writer = null;
+        System.out.print("Username: ");
+        String username = reader.next();
+
+        if(!Files.exists(Paths.get(filename))){
+            createFile(filename);
+        }
+        writer = openFile(filename);
+        if (writer != null) {
+            appendText(username, writer);
+        }
+    }
+    public static void registerPassword(String filename){
+        BufferedWriter writer = null;
+        System.out.print("Password: ");
+        String password = reader.next();
+        if(!Files.exists(Paths.get(filename))){
+            createFile(filename);
+        }
+        writer = openFile(filename);
+        if (writer != null) {
+            appendText(password, writer);
+        }
+    }
+    public static List<Integer> controlUsername(String filename, String username){
+        List<Integer> count = new ArrayList<Integer>();
+        List<String> usernames = readLineByLineMod(filename);
+        for (int i = 0;i < usernames.size();i++){
+            if(username.equals(usernames.get(i))){
+                count.add(i);
+            }
+        }
+        return count;
+    }
+    public static boolean controlPassword(List<Integer> count, String filename, String password){
+
+        List<String> passwords = readLineByLineMod(filename);
+        for (int i = 0; i < count.size();i++){
+            if(password.equals(passwords.get(count.get(i)))){
+                return true;
+            }
+        }
+        return false;
+    }
+    public static int IDCalculator(String fileUsername, String username, String filePassword, String password){
+        List<Integer> count = controlUsername(fileUsername, username);
+        List<String> passwords = readLineByLineMod(filePassword);
+        for(int i = 0; i < count.size(); i++){
+            if(password.equals(passwords.get(count.get(i)))){
+                int id = count.get(i) + 1;  // 0 ist eine schlechte ID deswegen +1
+                System.out.println("Your ID: " + id);
+                return count.get(i);
+            }
+        }
+        return 9999;
+    }
+    public static String enterUsername(){
+        System.out.print("Enter Username: ");
+        return reader.next();
+    }
+    public static String enterPassword(){
+        System.out.print("Enter Password: ");
+        return reader.next();
+    }
+    private static void readLine(String filename, int id) {
+        List<String> content = new ArrayList<String>();
+        try {
+            content = Files.readAllLines(Paths.get(filename));
+                System.out.println(content.get(id));
+
+        } catch (IOException e) {
+            System.out.println("Fehler!");
+        }
+
+    }
+
+
+
 }

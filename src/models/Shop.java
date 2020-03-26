@@ -1,8 +1,9 @@
 package models;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Shop {
+public class Shop implements Serializable {
 
     // fields
     private List<Article> _articles = new ArrayList<Article>();
