@@ -1,3 +1,7 @@
+//Hauptprogramm mit Encoding Fehler:
+
+
+
 import models.*;
 
 import java.io.*;
@@ -33,6 +37,7 @@ public class ProgramAmazon {
         int counter = 0;
         boolean fileExists = false;
         List<Article> loadedArticle = new ArrayList<>();
+        String fileBasket = "basket";
 
 
         if(Files.exists(Paths.get(fileArticle))){
@@ -74,11 +79,21 @@ public class ProgramAmazon {
                     break;
             }
         }while (!correctLogin);
+        System.out.println(" ");
+        System.out.println("Calculating ID...");
+        int id = IDCalculator(usernameConfig, enterUsername(), passwordConfig, enterPassword());
+        fileBasket += id;
+        //Beschriftung des Files mit ID
+        fileBasket += ".txt";
 
-        do{
+        do {
+            System.out.println(" ");
             choiceMainMenu = mainMenu();
             switch(choiceMainMenu){
                 case 's':
+                    if(Files.exists(Paths.get(fileBasket))){
+                        currentCustomer.setBasket(deserializeBasket(fileBasket));
+                    }
                     do{
                         choiceSearchMenu = searchMenu();
                         switch(choiceSearchMenu){
@@ -138,7 +153,6 @@ public class ProgramAmazon {
                     }while(choiceSearchMenu != 'x');
                     break;
                 case 'u':
-                    int id = IDCalculator(usernameConfig, enterUsername(), passwordConfig, enterPassword());
                     if (id >= 9999){
                         System.out.println("Error!");
                     }
@@ -155,6 +169,7 @@ public class ProgramAmazon {
                     if(currentCustomer.getBasket().getBasketItems().size() > 0){
                         // show basket
                         System.out.println(currentCustomer.getBasket().toString());
+
                         // confirm order
                         char confirm = confirmOrder();
                         // send a mail to the customer
@@ -184,6 +199,14 @@ public class ProgramAmazon {
                     char ch = reader.next().toLowerCase().charAt(0);
                     if(ch != 'y'){
                         choiceMainMenu = 'w';
+                    }
+                    if(currentCustomer.getBasket().getBasketItems().size() > 0){
+
+                    System.out.println(fileBasket); //Files mit Basket starten mit id = 0
+                    if(!Files.exists(Paths.get(fileBasket))){
+                        createFile(fileBasket);
+                    }
+                    serializeBasket(fileBasket, currentCustomer.getBasket());
                     }
                     break;
                 default:
@@ -296,6 +319,7 @@ public class ProgramAmazon {
             }
         }
     }
+    //File-Erstellung
     private static void createFile(String filename) {
         try {
             Files.createFile(Paths.get(filename));
@@ -439,12 +463,38 @@ public class ProgramAmazon {
         List<String> content = new ArrayList<String>();
         try {
             content = Files.readAllLines(Paths.get(filename));
-                System.out.println(content.get(id));
+            System.out.println(content.get(id));
 
         } catch (IOException e) {
             System.out.println("Fehler!");
         }
 
+    }
+    public static void serializeBasket(String filename, Basket basket){
+        try(FileOutputStream fos = new FileOutputStream(filename);
+            ObjectOutputStream oos = new ObjectOutputStream(fos)){
+
+            oos.writeObject(basket);
+
+        }
+        catch (IOException e){
+            System.out.println("Serialisierung hat nicht funktioniert!");
+        }
+    }
+    public static Basket deserializeBasket(String filename){
+        try(FileInputStream fis = new FileInputStream(filename);
+            ObjectInputStream ois = new ObjectInputStream(fis)){
+
+            return (Basket)ois.readObject();
+
+        }
+        catch (IOException e){
+            System.out.println("Deserialisierung hat nicht funktioniert!");
+        }
+        catch (ClassNotFoundException e){
+            System.out.println("Basket existiert nicht!");
+        }
+        return null;
     }
 
 
