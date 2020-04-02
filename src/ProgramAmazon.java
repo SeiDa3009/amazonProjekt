@@ -319,6 +319,7 @@ public class ProgramAmazon {
             }
         }
     }
+    //Erstellte Methoden für Auftrag:
     //File-Erstellung
     private static void createFile(String filename) {
         try {
@@ -329,6 +330,7 @@ public class ProgramAmazon {
             System.out.println("Fehler: IO-Fehler");
         }
     }
+    //Verwenden wir für die 1.Aufgabe um die Shopartikel zu speichern (List-Serialize)
     public static void serializeArticle(String filename, List<Article> articles){
         try(FileOutputStream fos = new FileOutputStream(filename);
             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
@@ -338,6 +340,7 @@ public class ProgramAmazon {
             System.out.println("Serialisierung hat nicht funktioniert!");
         }
     }
+    //Verwenden wir für 1.Aufgabe um die Shopartikel zu speichern (List-Serialize)
     public static List<Article> deserializeArticle(String filename){
         try(FileInputStream fis = new FileInputStream(filename);
             ObjectInputStream ois = new ObjectInputStream(fis)) {
@@ -353,6 +356,7 @@ public class ProgramAmazon {
         }
         return null;
     }
+    //Verwenden wir für die 2.Aufgabe um zu überprüfen ob login richtig war
     public static boolean login(boolean correctData){
         if(correctData){
             return true;
@@ -361,12 +365,15 @@ public class ProgramAmazon {
             return false;
         }
     }
+    //Verwenden wir für die 2.Aufgabe
+    //Login Menü
     public static char loginMenu(){
         System.out.println("l ... login");
         System.out.println("r ... register");
         System.out.print("Select one: ");
         return reader.next().toLowerCase().charAt(0);
     }
+    //Verwenden wir für die 2.Aufgabe um Username und Password in Dateien zu schreiben
     private static void appendText(String text, BufferedWriter writer) {
         try {
             writer.write(text + "\n");
@@ -375,6 +382,7 @@ public class ProgramAmazon {
             System.out.println("Fehler: Text konnte nicht in der Datei abgelegt werden!");
         }
     }
+    //Verwenden wir für die 2.Aufgabe um Username und Password in Dateien zu schreiben
     private static BufferedWriter openFile(String filename) {
         try {
             return Files.newBufferedWriter(Paths.get(filename), StandardOpenOption.APPEND);
@@ -383,6 +391,7 @@ public class ProgramAmazon {
         }
         return null;
     }
+    //Verwenden wir für die 2. Aufgabe um die Zeile zu lesen welche richtiger Username zu welchem richtigen Password gehören
     private static List<String> readLineByLineMod(String filename) {
         List<String> content = new ArrayList<String>();
         try {
@@ -394,6 +403,7 @@ public class ProgramAmazon {
         return null;
 
     }
+    //Verwenden wir für die 2. Aufgabe um Username zu registrieren und in Datei zu schreiben
     public static void registerUsername(String filename){
         BufferedWriter writer = null;
         System.out.print("Username: ");
@@ -407,6 +417,7 @@ public class ProgramAmazon {
             appendText(username, writer);
         }
     }
+    //Verwenden wir für die 2. Aufgabe um Password zu registrieren und in Datei zu schreiben
     public static void registerPassword(String filename){
         BufferedWriter writer = null;
         System.out.print("Password: ");
@@ -419,6 +430,7 @@ public class ProgramAmazon {
             appendText(password, writer);
         }
     }
+    //Verwenden wir für die 2.Aufgabe um Username zu kontrollieren bzw. überprüfen ob er übereinstimmt
     public static List<Integer> controlUsername(String filename, String username){
         List<Integer> count = new ArrayList<Integer>();
         List<String> usernames = readLineByLineMod(filename);
@@ -429,6 +441,7 @@ public class ProgramAmazon {
         }
         return count;
     }
+    //Verwenden wir für die 2.Aufgabe um Password zu kontrollieren bzw. überprüfen ob dieser übereinstimmt
     public static boolean controlPassword(List<Integer> count, String filename, String password){
 
         List<String> passwords = readLineByLineMod(filename);
@@ -439,6 +452,7 @@ public class ProgramAmazon {
         }
         return false;
     }
+    //Wichtig für die 3. Aufgabe um zu unterscheiden welche Person welcher Warenkorb gehört
     public static int IDCalculator(String fileUsername, String username, String filePassword, String password){
         List<Integer> count = controlUsername(fileUsername, username);
         List<String> passwords = readLineByLineMod(filePassword);
@@ -451,14 +465,17 @@ public class ProgramAmazon {
         }
         return 9999;
     }
+    //Eingabe für Username (Aufgabe 2/3)
     public static String enterUsername(){
         System.out.print("Enter Username: ");
         return reader.next();
     }
+    //Eingabe für Password (Aufgabe 2/3)
     public static String enterPassword(){
         System.out.print("Enter Password: ");
         return reader.next();
     }
+    // Dient dazu Eingabe von Username und Password zu lesen
     private static void readLine(String filename, int id) {
         List<String> content = new ArrayList<String>();
         try {
@@ -470,6 +487,7 @@ public class ProgramAmazon {
         }
 
     }
+    //Dient für die 3. Aufgabe um Basket zu speichern, falls jemand das Programm mit Artikel im Basket beendet
     public static void serializeBasket(String filename, Basket basket){
         try(FileOutputStream fos = new FileOutputStream(filename);
             ObjectOutputStream oos = new ObjectOutputStream(fos)){
@@ -481,6 +499,7 @@ public class ProgramAmazon {
             System.out.println("Serialisierung hat nicht funktioniert!");
         }
     }
+    //Dient für die 3. Aufgabe um Basket zu laden und um bei erneutiger Öffnung die Artikel im Warenkorb wiederherzustellen
     public static Basket deserializeBasket(String filename){
         try(FileInputStream fis = new FileInputStream(filename);
             ObjectInputStream ois = new ObjectInputStream(fis)){
