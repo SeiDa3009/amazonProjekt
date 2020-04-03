@@ -140,18 +140,7 @@ public class Login {
         System.out.print("Enter Password: ");
         return reader.next();
     }
-    // Dient dazu Eingabe von Username und Password zu lesen
-    public void readLine(String filename, int id) {
-        List<String> content = new ArrayList<String>();
-        try {
-            content = Files.readAllLines(Paths.get(filename));
-            System.out.println(content.get(id));
 
-        } catch (IOException e) {
-            System.out.println("Fehler!");
-        }
-
-    }
 
     
     //File-Erstellung
