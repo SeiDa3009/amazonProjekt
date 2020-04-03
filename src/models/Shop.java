@@ -1,6 +1,6 @@
 package models;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 
 public class Shop implements Serializable {
@@ -133,6 +133,8 @@ public class Shop implements Serializable {
         return null;
     }
 
+
+
     // toString()
     @Override
     public String toString(){
@@ -204,5 +206,32 @@ public class Shop implements Serializable {
         this._articles.get(11).addCategory("shirt");
         this._articles.get(11).addCategory("cotton");
         this._articles.get(11).addCategory("designable");
+    }
+    //Verwenden wir für die 1.Aufgabe um die Shopartikel zu speichern (List-Serialize)
+    public void serializeArticle(String filename, List<Article> articles){
+        try(FileOutputStream fos = new FileOutputStream(filename);
+            ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            oos.writeObject(articles);
+        }
+        catch (IOException e){
+            System.out.println("Serialisierung hat nicht funktioniert!");
+        }
+    }
+
+    //Verwenden wir für 1.Aufgabe um die Shopartikel zu speichern (List-Serialize)
+    public List<Article> deserializeArticle(String filename){
+        try(FileInputStream fis = new FileInputStream(filename);
+            ObjectInputStream ois = new ObjectInputStream(fis)) {
+
+            return (List<Article>)ois.readObject();
+        }
+
+        catch (IOException e){
+            System.out.println("Deserialisierung hat nicht funktioniert!");
+        }
+        catch(ClassNotFoundException e){
+            System.out.println("Klasse Person oder Address existiert nicht!");
+        }
+        return null;
     }
 }

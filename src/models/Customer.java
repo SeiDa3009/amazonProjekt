@@ -15,7 +15,9 @@ public class Customer {
     private Gender _gender;
     private List<Address> _addresses = new ArrayList<Address>();
     private Address _shippingAddress;
+    private String username;
     private Basket _basket = new Basket();
+    private String password;
 
     // getter/setter
     public int getCustomerId() {
@@ -47,6 +49,18 @@ public class Customer {
             this._eMail = eMail.trim();
         }
     }
+    public String getUsername(){
+        return username;
+    }
+    public void setUsername(String newUsername){
+        this.username = newUsername;
+    }
+    public String getPassword(){
+        return password;
+    }
+    public void setPassword(String newPassword){
+        this.password = newPassword;
+    }
     public Gender getGender() {
         return _gender;
     }
@@ -73,14 +87,16 @@ public class Customer {
 
     // ctors
     public Customer(){
-        this(0, "", "", null, Gender.notSpecified);
+        this(0, "", "", null, Gender.notSpecified, "","");
     }
-    public Customer(int id, String firstname, String lastname, LocalDate birthdate, Gender gender){
+    public Customer(int id, String firstname, String lastname, LocalDate birthdate, Gender gender, String username, String password){
         this._customerId = id > 0 ? id : 0;
         this.setFirstname(firstname);
         this.setLastname(lastname);
         this.setBirthdate(birthdate);
         this.setGender(gender);
+        this.username = username;
+        this.password = password;
     }
 
     // other methods
